@@ -1,0 +1,244 @@
+---
+layout:     post
+title:      "代码的坏味道"
+subtitle:   "学会判断一个类内有多少实例变量算是太大、一个函数内有多少代码才算太长。探明代码的坏味道，才能有针对性的重构。"
+date:       2017-04-18 12:00:00
+author:     "Wang Perry"
+header-img: "img/post-bg-01.jpg"
+---
+
+# 代码的坏味道
+
+学会判断一个类内有多少实例变量算是太大、一个函数内有多少代码才算太长。探明代码的坏味道，才能有针对性的重构。
+
+## 1.Duplicated Code （重复代码）
+
+基本现象:
+
+1. 同一个类内,两个函数含有相同的表达式。
+2. 两个互为兄弟的子类内含有相同表达式。
+3. 两个毫不相关的类出现 重复代码。
+
+解决方法:
+
+1. Extract Method(110）
+2. 对两个类同时使用Extract Method(110)；对被提炼出来的代码使用 Pull Up Method(332)，将它们推入超类；如果只是相似，并非完全相同，使用 Extract Method(110)将相似部分与差异部分割开，运用 Form Template Method(345)；如果有些函数以不同算法做相同的事，选择较清晰的一个，使用Substitute Algorighm(139)将其他函数算法替换掉。
+3. Extract Class(149)。如果业务上必须放在某个类，需判断放在哪个类最合适。 
+
+## 2.Long Method (过长函数)
+
+基本现象：
+
+关键不在于函数的长度，而在于函数“做什么”与“如何做”之间的语义距离。每当感觉需要以注释来说明点什么的时候，我们就需要把说明的东西写进一个独立函数，并以其用途命名。
+
+确定该提炼哪一段代码？一个很好的技巧是：寻找注释。
+条件表达式、循环 也常是提炼的信号。
+
+解决方法：
+
+* Extract Method(110),导致许多参数和临时变量作参数
+* Replace Temp with Query(120) 消除临时元素
+* Introduce Parameter Object（295）和 Preserve Whole Object（288）使过长参数列变得更简洁
+* 杀手锏：Replace Method with Method Object (135)
+* Decompose Conditional(238)处理条件表达式
+
+## 3.Large Class（过大的类）
+现象：如果想利用单个类做太多事情，其内往往就会出现太多实例变量，或太多代码
+
+解决方法：
+
+* 使用Extract Class（149）
+* Extract SubClass（330）
+* 先确定客户端如何使用它们，然后使用Extract Interface（341）为每一种使用方式提炼出一个接口
+* Duplicate Observed Data（189）将UI数据与行为移到一个独立的领域对象去。
+
+## 4.Long Parameter List (过长参数列)
+现象：参数列过长
+
+解决方法：
+
+* Replace Parameter with Method（292）
+* Preserve Whole Object（288）
+* Introduce Parameter Object（295）
+
+## 5.Divergent Change (发散式变化)
+现象：如果某个类经常因为不同的原因在不同的方向上发生变化。一个类受多种变化的影响。目的使 外界变化与需要修改的类一一对应。
+
+解决方法：
+
+* 使用Extract Class将变化提炼到类中
+
+## 6.Shotgun Surgery(霰(xian)弹式修改)
+现象：因一次变化，在很多地方修改。一种变化引发多个类相应修改
+
+解决方法：
+
+* 将所有修改的代码放进同一个类 Move Method（142）和Move Field（146）
+* Inline Class（154）将一系列相关行为放进同一个类
+
+## 7.Feature Envy(依恋情结)
+现象：函数对某个类的兴趣高过对自己所处类的兴趣
+
+解决方法：
+
+* Move Method（142）
+* 先Extract Method（110），再Move Method（142）
+* 判断哪个类拥有最多被此函数使用的数据，然后就把这个函数和那些数据摆在一起。
+* Strategy和Visitor，将总是一起变化的东西放在一块儿。
+
+## 8.Data Clumps (数据泥团)
+现象：两个类中相同的字段，许多函数签名中相同的参数。删除众多数据中的一项，这么做，其他数据有没有因而失去意义，如果它们不再有意义，你应该为它们产生一个新对象。
+
+解决方法：
+
+* 运用Extract Class（149）将它们提炼至一个独立的对象中
+* 运用Introduce Parameter Object（295）或Preserve Whole Object（288）为它减肥
+* 减少字段和参数的个数，当然可以去除一些坏味道。
+
+## 9.Primitive Obsession（基本类型偏执）
+现象：对象一个极大的价值在于，它们模糊了横亘在基本数据与较大的类之间的界限
+
+解决方法：
+
+* Replace Data Value with Object（175）将原本单独存在的数据值替换为对象
+* Replace Type Code with Class（218）替换的数据值为类型码
+* 与类型码相关的条件表达式，运用Replace Type Code with Subclass（213）或Replace Type Code with State/Strategy（227）
+* 如果你有一组总是放在一起的字段，使用Extract Class（149）
+* 在参数列中看到基本类型数据，使用Introduce Parameter Object（295）
+* 从数组中挑选数据，使用Replace Array with Object（186）
+
+## 10.Switch Statements (switch 惊悚现身)
+现象：少用switch case语句，建议用多态替换
+
+解决方法：
+
+* 使用多态抽取，Extract Method（110）将switch语句提炼到一个独立函数
+* Move Method（142）将它搬移到多态性的类
+* 判断是否使用Replace Type Code with Subclasses（223）或Replace Type Code with State/Strategy
+* Replace Conditional with Ploymorphism（255）
+* 如果只在单一函数中有选择事例，且并不想改动它们。这种情况使用Replace Parameter with Explicit Methods（285），如果选择条件之一是null，试试Introduce Null Object（260）
+
+
+## 11.Parallel Inheritance Hierarchies(平行继承体系)
+现象：是Shotgun Surgery的特殊情况。每当为某个类增加一个子类，必须为另一个类相应增加一个子类。如果一个继承体系中的类名称前缀和另一个继承体系中的类名称前缀完全相同，便是这种情况
+
+解决方法：
+
+* 让一个继承体系的实例引用另一个继承体系的实例
+* 继续用Move Method（142）和Move Field（146）
+
+
+## 12.Lazy Class(冗赘类)
+现象：由于变化，导致原来的类成为孤家寡人
+
+解决方法：
+
+* 如果某些子类没有做足够的工作，使用 Collapse Hierarchy（344）
+* 对于几乎没用的组件，使用Inline Class（154）
+
+## 13.Speculative Generality（夸夸其谈未来性）
+现象：如果所有设置都会被用到，那就值得做；如果用不到，就不值得
+
+解决方法：
+
+* Collapse Hierarchy（344）处理抽象类
+* Inline Class（154）除掉不必要的委托
+* 如果某些参数未被用上，用Remove Parameter（277）
+* Rename Method（273）去除函数名称的抽象意味
+* 如果函数或类的唯一用户是测试用例，就出现了Speculative Generallity，如果出现这样的情况，连同测试用例一起删除。如果它们的用途是帮助测试用例检测正当功能，需保留。
+
+## 14.Temporary Field (令人迷惑的暂时字段)
+现象：对象内的某个实例变量仅为某种特定情况而设。
+
+解决方法：
+
+* 使用Extract Class（149）把所有和变量相关的代码放到新类。
+* Introduce Null Object（260）在“变量不合法”的情况下创建Null对象，从而避免写出条件式代码。
+
+## 15.Message Chains（过度耦合的消息链）
+现象：用户像一个对象请求另一个对象，再向后者请求另一个对象。。。这就是消息链。一旦对象间的关系发生任何变化，客户端就不得不做出相应修改。
+
+解决方法：
+
+* 在不同位置使用Hide Delegate（157）
+* 观察消息链最终的对象，使用Extract Method（110）把使用该对象的代码提炼到一个独立函数中，再用Move Method（142）推入消息链。
+
+## 16.Middle Man（中间人）
+现象：过度运用委托
+
+解决方法：
+
+* Remove Middle Man（160），直接和真正负责的对象打交道
+* 如果比较少，可以运用InlineMethod（117）放进调用端
+* 如果Middle Man还有其他行为，可以运用Replace Delegation with Inheritance（355）把它变成实责对象的子类，这样既可以扩展原对象的行为，又不必负担那么多的委托动作。
+
+## 17.Inappropriate Intimacy（狎昵关系）
+现象:两个类过于亲密，关系相交叉
+
+解决方法：
+
+* Move Method(142)或Move Field（146）
+* Change Bidirectional Association to Unidirectional(200)切断相互的关系
+* Extract Class（149）两者共同点提炼至安全地点
+* Hide Delegate（157）让另一个类关联
+* Replace Inheritance with Delegation(352)脱离继承关系
+
+## 18.Alternative Classes with Different Interfaces(异曲同工的类)
+现象：两个函数做同一件事，却有不同的命名
+
+解决方法:
+
+* 使用Rename Method(273) 根据用途命名
+* 反复运用 Move Method(142)将某些行为移入类。
+* 通过Extract SuperClass(336)
+
+## 19.Incomplate Library Class（不完美的库类）
+现象：
+
+大多数对象只是够用
+
+解决方法：
+
+* 如果只想修改库类的一两个函数，运用Introduce Foreign Method(162)
+* 如果想添加一大堆额外行为，需运用Introduce Local Extension(164)
+
+## 20.Data Class（纯稚的数据类）
+
+现象：
+所谓Data Class是指，它们拥有一些字段，以及用于访问这些字段的函数，除此之外一无长物。例如：类中拥有public的字段。
+
+解决方法：
+
+* Encapsulate Field（206）将普通字段封装
+* Encapsulate Collection（208）将容器类的字段封装
+* 对于不该被其他类修改的字段，运用Remove Setting Method（300）
+
+## 21.Refused Bequest (被拒绝的遗赠)
+
+现象:
+子类应该继承超类的函数和数据。但如果它们不想或不需要继承，又该怎么办呢？它们得到所有礼物，却只从中挑选几样来玩。
+
+解决方法：
+
+* 按传统说法，为子类新建一个兄弟类，使用Push Down Method(328)和Push Down Field（329）把所有用不到的函数下推到那个兄弟。让超类持有子类共有的东西。
+* 不建议每次都按照上述的做法。
+
+## 22.Comments（过多的注释）
+
+现象：
+某些情况，一段代码有长长的注释，这些注释之所以存在是因为代码很糟糕。Comments可以带我们找到之前提到的各种坏味道。完成重构后，我们发现：注释已经变得多余了，因为代码已经清楚说明了一切。
+
+解决方法：
+
+* Extrace Method（110）
+* Rename Method（273）
+* Introduce Assertion（267）
+
+在写注释时，试着尝试重构。
+注释里可以写下自己“为什么做某某事”
+  
+
+
+
+
+
