@@ -1,15 +1,15 @@
 # Site settings
-title: Clean Blog
+title: Perry'S Blog
 header-img: img/home-bg.jpg
-email: your-email@yourdomain.com
-copyright_name: Your/Project/Corporate Name
+email: 405401774@qq.com
+copyright_name: Wang Perry
 description: "Write your site description here. It will be used as your sites meta description as well!"
 baseurl: ""
 url: "https://wpfcrazy.github.io"
-twitter_username: SBootstrap
-github_username:  davidtmiller
-facebook_username:  StartBootstrap
-email_username:  your-email@yourdomain.com
+twitter_username: 
+github_username:  wpfcrazy
+facebook_username:  
+email_username:  405401774@qq.com
 
 # Google Analytics
 # To enable google analytics, uncomment below line with a valid Google Tracking ID
